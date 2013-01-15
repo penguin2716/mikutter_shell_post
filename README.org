@@ -33,6 +33,11 @@
    入力されたソースをファイルに書き，指定したprogramを用いて実行します．
    optionsを指定することもできます．
 
+** @compile [srcfilename] [outputfile] compiler options...
+   入力されたソースをファイルに書き，指定したcompilerを用いて実行します．
+   optionsを指定できます．
+   コンパイル後はoutputfileを実行します．
+
 * 使用例
   - @shell uptime
   - @shell_p gnome_terminal
