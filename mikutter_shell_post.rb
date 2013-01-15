@@ -121,7 +121,7 @@ Plugin.create :shell_post do
         f = open("#{COMPILE_TMPDIR}/#{filename}", "w")
         f.write(escape(source, /^@compile.*\n/))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && #{command} #{filename} 2>&1 && ./#{output} 2>&1`
+        result = `cd #{COMPILE_TMPDIR} && #{command} #{filename} 2>&1 && #{output} 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }

@@ -33,10 +33,10 @@
    入力されたソースをファイルに書き，指定したprogramを用いて実行します．
    optionsを指定することもできます．
 
-** @compile [srcfilename] [outputfile] compiler options...
+** @compile [srcfilename] [exec command] compiler options...
    入力されたソースをファイルに書き，指定したcompilerを用いて実行します．
    optionsを指定できます．
-   コンパイル後はoutputfileを実行します．
+   コンパイル後はexec commandを実行します．
 
 * 式展開機能
   投稿する際に#{}によってRubyの式を記述することができます．
