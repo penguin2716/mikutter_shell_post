@@ -29,6 +29,10 @@
 ** @shell_cpp
    C++のソースとして解釈し，コンパイルしてから実行します．
 
+** @script program options...
+   入力されたソースをファイルに書き，指定したprogramを用いて実行します．
+   optionsを指定することもできます．
+
 * 使用例
   - @shell uptime
   - @shell_p gnome_terminal

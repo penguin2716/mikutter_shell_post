@@ -81,6 +81,21 @@ Plugin.create :shell_post do
       }
       clear_post(gui_postbox)
 
+    # 入力されたテキストをファイルに書いて指定されたコマンドで実行
+    elsif text =~ /^@script.*/
+      Thread.new {
+        command = Regexp.new(/^@script +(.*)\n/).match(text).to_a[1]
+        source = text.sub(/^@script +.*\n/, '')
+
+        `mkdir #{COMPILE_TMPDIR}`
+        f = open("#{COMPILE_TMPDIR}/src.script", "w")
+        f.write(escape(source, /^@script.*\n/))
+        f.close
+        result = `cd #{COMPILE_TMPDIR} && timeout 10 #{command} ./src.script 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}`
+        Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
+      }
+      clear_post(gui_postbox)
     end
 
     [gui_postbox]
