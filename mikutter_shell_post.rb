@@ -20,8 +20,19 @@ Plugin.create :shell_post do
   filter_gui_postbox_post do |gui_postbox|
     text = Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text
 
+    # #{}が含まれる場合はRubyコードとして展開する
+    if text =~ /#\{[^\}]+\}/
+      while text =~ /#\{[^\}]+\}/
+        re = Regexp.new(/#\{([^\}]+)\}/)
+        command = re.match(text).to_a[1]
+        result = `timeout 10 ruby -e '#{escape(command, '')}'`
+        text.sub!(/#\{[^\}]+\}/, result)
+      end
+      Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text = text
+      Plugin.filter_cancel!
+
     # @shell に向けたリプライは10秒でtimeoutする
-    if text =~ /^@shell[ \n]+.+/
+    elsif text =~ /^@shell[ \n]+.+/
       Thread.new{
         Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 #{text.sub(/^@shell[ \n]+/,'')}`}", :system => true)])
       }
