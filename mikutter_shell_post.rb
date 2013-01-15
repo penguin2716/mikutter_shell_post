@@ -108,12 +108,12 @@ Plugin.create :shell_post do
       }
       clear_post(gui_postbox)
 
-    # 入力されたテキストをファイルに書いて指定されたコマンドでコンパイル後，./a.outを実行
+    # 入力されたテキストをファイルに書いて指定されたコマンドでコンパイル後，exec_commandを実行
     elsif text =~ /^@compile.*/
       Thread.new {
         re = Regexp.new(/^@compile *\[(.+)\] *\[(.+)\] *(.+)\n/)
         filename = re.match(text).to_a[1]
-        output = re.match(text).to_a[2]
+        exec_command = re.match(text).to_a[2]
         command = re.match(text).to_a[3]
         source = text.sub(/^@compile +.*\n/, '')
 
@@ -121,7 +121,7 @@ Plugin.create :shell_post do
         f = open("#{COMPILE_TMPDIR}/#{filename}", "w")
         f.write(escape(source, /^@compile.*\n/))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && #{command} #{filename} 2>&1 && #{output} 2>&1`
+        result = `cd #{COMPILE_TMPDIR} && #{command} #{filename} 2>&1 && #{exec_command} 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
