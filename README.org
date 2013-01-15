@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 * 概要
-  mikutterで投稿する際に，@shellまたは@shell_pに向けたポストを
+  mikutterで投稿する際に，@shellや@shell_pに向けたポストを
   シェルコマンドとして解釈し，実行します．
   コマンドの実行結果がシステムメッセージとして自分のタイムラインに流れてきます．
 
@@ -14,9 +14,21 @@
    pはpersistのpです．ここに向けたコマンドはtimeoutしません．
    シェルを立ち上げたりするときに便利です．
 
+** @shell_rb
+   Rubyで実行します．
+
+** @shell_py
+   Pythonで実行します．
+
+** @shell_pl
+   Perlで実行します．
+
 * 使用例
   - @shell uptime
   - @shell_p gnome_terminal
+  - @shell_rb 10.times { |x| puts x }
+  - @shell_py print "10 * 20 = %d" % (10 * 20)
+  - @shell_pl print 3 * 9 * 3 * 9
 
 * FAQ
   @shellや@shell_pに向けてリプライを飛ばしたい．
