@@ -2,6 +2,8 @@
 
 Plugin.create :shell_post do
 
+  COMPILE_TMPDIR = "/dev/shm/mikutter_scratch"
+
   # PostBoxの中身をクリアしてイベントをキャンセル
   def clear_post(gui_postbox)
     Plugin.call(:before_postbox_post,
@@ -50,6 +52,32 @@ Plugin.create :shell_post do
     elsif text =~ /^@shell_pl[ \n]+.+/
       Thread.new{
         Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 perl -e '#{escape(text, '@shell_pl')}'`}", :system => true)])
+      }
+      clear_post(gui_postbox)
+
+    # Cで実行
+    elsif text =~ /^@shell_c[ \n]+.+/
+      Thread.new{
+        `mkdir #{COMPILE_TMPDIR}`
+        f = open("#{COMPILE_TMPDIR}/src.c", "w")
+        f.write(escape(text, '@shell_c'))
+        f.close
+        result = `cd #{COMPILE_TMPDIR} && gcc src.c 2>&1 && timeout 10 ./a.out 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}`
+        Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
+      }
+      clear_post(gui_postbox)
+
+    # C++で実行
+    elsif text =~ /^@shell_cpp[ \n]+.+/
+      Thread.new{
+        `mkdir #{COMPILE_TMPDIR}`
+        f = open("#{COMPILE_TMPDIR}/src.cpp", "w")
+        f.write(escape(text, '@shell_cpp'))
+        f.close
+        result = `cd #{COMPILE_TMPDIR} && g++ src.cpp 2>&1 && timeout 10 ./a.out 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}`
+        Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)
 

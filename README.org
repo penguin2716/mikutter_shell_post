@@ -23,6 +23,12 @@
 ** @shell_pl
    Perlで実行します．
 
+** @shell_c
+   Cのソースとして解釈し，コンパイルしてから実行します．
+
+** @shell_cpp
+   C++のソースとして解釈し，コンパイルしてから実行します．
+
 * 使用例
   - @shell uptime
   - @shell_p gnome_terminal
