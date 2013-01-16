@@ -20,8 +20,19 @@ Plugin.create :shell_post do
   filter_gui_postbox_post do |gui_postbox|
     text = Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text
 
+    # @system に向けたリプライはmikutterコマンドとして処理する
+    if text =~ /^@system[ \n]+.+/
+      Thread.new{
+        begin
+          Kernel.instance_eval(text.sub(/^@system[ \n]+/,''))
+        rescue Exception => e
+          Plugin.call(:update, nil, [Message.new(:message => "失敗しました(´・ω・｀)\nコードを確認してみて下さい↓\n#{text}", :system => true)])
+        end
+      }
+      clear_post(gui_postbox)
+
     # @shell に向けたリプライは10秒でtimeoutする
-    if text =~ /^@shell[ \n]+.+/
+    elsif text =~ /^@shell[ \n]+.+/
       Thread.new{
         Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 #{text.sub(/^@shell[ \n]+/,'')}`}", :system => true)])
       }
