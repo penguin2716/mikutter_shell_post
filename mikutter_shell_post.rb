@@ -133,7 +133,11 @@ Plugin.create :shell_post do
       while text =~ /#\{[^\}]+\}/
         re = Regexp.new(/#\{([^\}]+)\}/)
         command = re.match(text).to_a[1]
-        result = Kernel.instance_eval(command)
+        begin
+          result = Kernel.instance_eval(command)
+        rescue Exception => e
+          result = e
+        end
         text.sub!(/#\{[^\}]+\}/, result.to_s)
       end
       Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text = text
