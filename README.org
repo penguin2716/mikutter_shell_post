@@ -54,6 +54,51 @@
   - @shell_rb 10.times { |x| puts x }
   - @shell_py print "10 * 20 = %d" % (10 * 20)
   - @shell_pl print 3 * 9 * 3 * 9
+  - C++のコード例
+  : @compile [src.cpp] [./a.out] g++
+  : #include <iostream>
+  : using namespace std;
+  : int main(void)
+  : {
+  :   cout << "Hello, world!" << endl;
+  :   return 0;
+  : }
+  - Javaのコード例
+  : @compile [Hello.java] [java Hello] javac
+  : import java.awt.*;
+  : import java.awt.event.*;
+  : import javax.swing.*;
+  : class Hello {
+  :   public static void main(String args[]) {
+  :     JFrame frame = new JFrame("Java on mikutter");
+  :     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+  :     frame.setLayout(new BorderLayout());
+  :     frame.setSize(250,100);
+  :     JButton button = new JButton("Exit");
+  :     button.addActionListener(new ActionListener() {
+  :       public void actionPerformed(ActionEvent e) {
+  :         System.exit(0);
+  :       }
+  :     });
+  :     frame.add(new JLabel("Java on mikutter"), BorderLayout.NORTH);
+  :     JPanel panel = new JPanel();
+  :     panel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
+  :     panel.add(button);
+  :     frame.add(panel, BorderLayout.CENTER);
+  :     frame.setVisible(true);
+  :  }
+  : }
+  - gnuplotのコード例
+  : @script gnuplot -p
+  : v0 = 0
+  : g = 9.8
+  : set yrange [0:10]
+  : set xrange [0:2]
+  : set xlabel "time [sec]"
+  : set ylabel "height [m]"
+  : set title "Free Fall"
+  : unset key
+  : plot v0 * x + 0.5 * (-g) * x **2 + 10 linewidth 2
 
 * FAQ
   @shellや@shell_pに向けてリプライを飛ばしたい．
