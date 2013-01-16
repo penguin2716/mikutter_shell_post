@@ -54,6 +54,7 @@
   - @shell_rb 10.times { |x| puts x }
   - @shell_py print "10 * 20 = %d" % (10 * 20)
   - @shell_pl print 3 * 9 * 3 * 9
+
   - C++のコード例
   : @compile [src.cpp] [./a.out] g++
   : #include <iostream>
@@ -63,6 +64,7 @@
   :   cout << "Hello, world!" << endl;
   :   return 0;
   : }
+
   - Javaのコード例
   : @compile [Hello.java] [java Hello] javac
   : import java.awt.*;
@@ -88,6 +90,7 @@
   :     frame.setVisible(true);
   :  }
   : }
+
   - gnuplotのコード例
   : @script gnuplot -p
   : v0 = 0
@@ -99,7 +102,7 @@
   : set title "Free Fall"
   : unset key
   : plot v0 * x + 0.5 * (-g) * x **2 + 10 linewidth 2
-
+  
 * FAQ
   @shellや@shell_pに向けてリプライを飛ばしたい．
   => 右側の投稿ボタンを押せばリプライとして投稿できます．
