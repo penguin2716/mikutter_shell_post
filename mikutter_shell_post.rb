@@ -24,7 +24,8 @@ Plugin.create :shell_post do
     if text =~ /^@system[ \n]+.+/
       Thread.new{
         begin
-          Kernel.instance_eval(text.sub(/^@system[ \n]+/,''))
+          result = Kernel.instance_eval(text.sub(/^@system[ \n]+/,''))
+          Plugin.call(:update, nil, [Message.new(:message => "#{result.to_s}", :system => true)])
         rescue Exception => e
           Plugin.call(:update, nil, [Message.new(:message => "失敗しました(´・ω・｀)\nコードを確認してみて下さい↓\n#{text}", :system => true)])
         end
