@@ -133,8 +133,8 @@ Plugin.create :shell_post do
       while text =~ /#\{[^\}]+\}/
         re = Regexp.new(/#\{([^\}]+)\}/)
         command = re.match(text).to_a[1]
-        result = `timeout 10 ruby -e '#{escape(command, '')}'`
-        text.sub!(/#\{[^\}]+\}/, result)
+        result = Kernel.instance_eval(command)
+        text.sub!(/#\{[^\}]+\}/, result.to_s)
       end
       Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text = text
       Plugin.filter_cancel!
