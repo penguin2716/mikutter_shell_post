@@ -19,6 +19,10 @@ Plugin.create :shell_post do
   def source_escape(str, delete_str)
     str.sub(/^#{delete_str}[ \n]+/,'').gsub(/'/, '''\'''')    
   end
+
+  def gen_random_str
+    (("a".."z").to_a + ("A".."Z").to_a + (0..9).to_a).shuffle[0..20].join
+  end
   
   # @shell または @shell_p に向けたリプライをシェルコマンドと解釈する
   filter_gui_postbox_post do |gui_postbox|
@@ -74,12 +78,13 @@ Plugin.create :shell_post do
     # Cで実行
     elsif text =~ /^@shell_c[ \n]+.+/
       Thread.new{
-        `mkdir #{COMPILE_TMPDIR}`
-        f = open("#{COMPILE_TMPDIR}/src.c", "w")
+        uniqdir = gen_random_str
+        `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
+        f = open("#{COMPILE_TMPDIR}/#{uniqdir}/src.c", "w")
         f.write(source_escape(text, '@shell_c'))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && gcc src.c 2>&1 && timeout 10 ./a.out 2>&1`
-        `rm -rf #{COMPILE_TMPDIR}`
+        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && gcc src.c 2>&1 && timeout 10 ./a.out 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)
@@ -87,12 +92,13 @@ Plugin.create :shell_post do
     # C++で実行
     elsif text =~ /^@shell_cpp[ \n]+.+/
       Thread.new{
-        `mkdir #{COMPILE_TMPDIR}`
-        f = open("#{COMPILE_TMPDIR}/src.cpp", "w")
+        uniqdir = gen_random_str
+        `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
+        f = open("#{COMPILE_TMPDIR}/#{uniqdir}/src.cpp", "w")
         f.write(source_escape(text, '@shell_cpp'))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && g++ src.cpp 2>&1 && timeout 10 ./a.out 2>&1`
-        `rm -rf #{COMPILE_TMPDIR}`
+        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && g++ src.cpp 2>&1 && timeout 10 ./a.out 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)
@@ -103,12 +109,13 @@ Plugin.create :shell_post do
         command = Regexp.new(/^@script +(.*)\n/).match(text).to_a[1]
         source = text.sub(/^@script +.*\n/, '')
 
-        `mkdir #{COMPILE_TMPDIR}`
-        f = open("#{COMPILE_TMPDIR}/src.script", "w")
+        uniqdir = gen_random_str
+        `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
+        f = open("#{COMPILE_TMPDIR}/#{uniqdir}/src.script", "w")
         f.write(source_escape(source, /^@script.*\n/))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && #{command} ./src.script 2>&1`
-        `rm -rf #{COMPILE_TMPDIR}`
+        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && #{command} ./src.script 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)
@@ -122,12 +129,13 @@ Plugin.create :shell_post do
         command = re.match(text).to_a[3]
         source = text.sub(/^@compile +.*\n/, '')
 
-        `mkdir #{COMPILE_TMPDIR}`
-        f = open("#{COMPILE_TMPDIR}/#{filename}", "w")
+        uniqdir = gen_random_str
+        `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
+        f = open("#{COMPILE_TMPDIR}/#{uniqdir}/#{filename}", "w")
         f.write(source_escape(source, /^@compile.*\n/))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && #{command} #{filename} 2>&1 && #{exec_command} 2>&1`
-        `rm -rf #{COMPILE_TMPDIR}`
+        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && #{command} #{filename} 2>&1 && #{exec_command} 2>&1`
+        `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)
