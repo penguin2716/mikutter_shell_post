@@ -168,6 +168,13 @@ Plugin.create :shell_post do
         ::Gtk::openurl("https://maps.google.co.jp/maps?q=" + URI.escape(text.sub(/^@maps[ \n]+/,'')).to_s)
       }
       clear_post(gui_postbox)
+
+    # @openurl に向けたリプライはそのままブラウザで開く
+    elsif text =~ /^@openurl[ \n]+.+/
+      Thread.new{
+        ::Gtk::openurl("#{text.sub(/^@openurl[ \n]+/,'')}")
+      }
+      clear_post(gui_postbox)
     end
 
     [gui_postbox]
