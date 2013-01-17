@@ -154,6 +154,13 @@ Plugin.create :shell_post do
       end
       Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text = text
       Plugin.filter_cancel!
+
+    # @google に向けたリプライをクエリにしてGoogle検索
+    elsif text =~ /^@google[ \n]+.+/
+      Thread.new{
+        ::Gtk::openurl("http://www.google.co.jp/search?q=" + URI.escape(text.sub(/^@google[ \n]+/,'')).to_s)
+      }
+      clear_post(gui_postbox)
     end
 
     [gui_postbox]
