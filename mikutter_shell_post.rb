@@ -103,7 +103,7 @@ Plugin.create :shell_post do
         f = open("#{COMPILE_TMPDIR}/src.script", "w")
         f.write(escape(source, /^@script.*\n/))
         f.close
-        result = `cd #{COMPILE_TMPDIR} && timeout 10 #{command} ./src.script 2>&1`
+        result = `cd #{COMPILE_TMPDIR} && #{command} ./src.script 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
