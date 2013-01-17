@@ -161,6 +161,13 @@ Plugin.create :shell_post do
         ::Gtk::openurl("http://www.google.co.jp/search?q=" + URI.escape(text.sub(/^@google[ \n]+/,'')).to_s)
       }
       clear_post(gui_postbox)
+
+    # @maps に向けたリプライをクエリにして地図検索
+    elsif text =~ /^@maps[ \n]+.+/
+      Thread.new{
+        ::Gtk::openurl("https://maps.google.co.jp/maps?q=" + URI.escape(text.sub(/^@maps[ \n]+/,'')).to_s)
+      }
+      clear_post(gui_postbox)
     end
 
     [gui_postbox]
