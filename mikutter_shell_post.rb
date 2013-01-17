@@ -12,10 +12,14 @@ Plugin.create :shell_post do
     Plugin.filter_cancel!
   end
 
-  def escape(str, delete_str)
+  def command_escape(str, delete_str)
     str.sub(/^#{delete_str}[ \n]+/,'').gsub(/'/, '''\'''\\\\''\'''''\'''')    
   end
 
+  def source_escape(str, delete_str)
+    str.sub(/^#{delete_str}[ \n]+/,'').gsub(/'/, '''\'''')    
+  end
+  
   # @shell または @shell_p に向けたリプライをシェルコマンドと解釈する
   filter_gui_postbox_post do |gui_postbox|
     text = Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text
@@ -49,21 +53,21 @@ Plugin.create :shell_post do
     # Rubyで実行
     elsif text =~ /^@shell_rb[ \n]+.+/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 ruby -e '#{escape(text, '@shell_rb')}'`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 ruby -e '#{command_escape(text, '@shell_rb')}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Pythonで実行
     elsif text =~ /^@shell_py[ \n]+.+/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 python -c '#{escape(text, '@shell_py')}'`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 python -c '#{command_escape(text, '@shell_py')}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Perlで実行
     elsif text =~ /^@shell_pl[ \n]+.+/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 perl -e '#{escape(text, '@shell_pl')}'`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 perl -e '#{command_escape(text, '@shell_pl')}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
@@ -72,7 +76,7 @@ Plugin.create :shell_post do
       Thread.new{
         `mkdir #{COMPILE_TMPDIR}`
         f = open("#{COMPILE_TMPDIR}/src.c", "w")
-        f.write(escape(text, '@shell_c'))
+        f.write(source_escape(text, '@shell_c'))
         f.close
         result = `cd #{COMPILE_TMPDIR} && gcc src.c 2>&1 && timeout 10 ./a.out 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
@@ -85,7 +89,7 @@ Plugin.create :shell_post do
       Thread.new{
         `mkdir #{COMPILE_TMPDIR}`
         f = open("#{COMPILE_TMPDIR}/src.cpp", "w")
-        f.write(escape(text, '@shell_cpp'))
+        f.write(source_escape(text, '@shell_cpp'))
         f.close
         result = `cd #{COMPILE_TMPDIR} && g++ src.cpp 2>&1 && timeout 10 ./a.out 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
@@ -101,7 +105,7 @@ Plugin.create :shell_post do
 
         `mkdir #{COMPILE_TMPDIR}`
         f = open("#{COMPILE_TMPDIR}/src.script", "w")
-        f.write(escape(source, /^@script.*\n/))
+        f.write(source_escape(source, /^@script.*\n/))
         f.close
         result = `cd #{COMPILE_TMPDIR} && #{command} ./src.script 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
@@ -120,7 +124,7 @@ Plugin.create :shell_post do
 
         `mkdir #{COMPILE_TMPDIR}`
         f = open("#{COMPILE_TMPDIR}/#{filename}", "w")
-        f.write(escape(source, /^@compile.*\n/))
+        f.write(source_escape(source, /^@compile.*\n/))
         f.close
         result = `cd #{COMPILE_TMPDIR} && #{command} #{filename} 2>&1 && #{exec_command} 2>&1`
         `rm -rf #{COMPILE_TMPDIR}`
