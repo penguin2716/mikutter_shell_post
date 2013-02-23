@@ -177,9 +177,13 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     elsif text =~ /^@?whois @?[a-zA-Z0-9_]+/
-      Plugin.call(:show_profile,
-                  Service.primary,
-                  User.findbyidname(Regexp.new(/^@?whois @?([a-zA-Z0-9_]+)/).match(text).to_a[1]) )
+      idname = Regexp.new(/^@?whois @?([a-zA-Z0-9_]+)/).match(text).to_a[1]
+      user = User.findbyidname(idname)
+      if user
+        Plugin.call(:show_profile, Service.primary, user)
+      else
+        Plugin.call(:update, nil, [Message.new(:message => "@#{idname}が見つかりませんでした", :system => true)])
+      end
       clear_post(gui_postbox)      
     end
 
