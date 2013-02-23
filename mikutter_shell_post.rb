@@ -1,8 +1,54 @@
 #-*- coding: utf-8 -*-
 
+require 'socket'
+require 'json'
+require 'cgi'
+
 Plugin.create :shell_post do
 
   COMPILE_TMPDIR = "/dev/shm/mikutter_scratch"
+
+  def postal_search(query, mode = :auto)
+    s = TCPSocket.new("api.postalcode.jp", 80)
+
+    if mode == :zipcode
+      s.write("GET /v1/zipsearch?zipcode=#{query} HTTP/1.0\r\n\r\n")
+    elsif mode == :word
+      s.write("GET /v1/zipsearch?word=#{CGI.escape(query)} HTTP/1.0\r\n\r\n")
+    else
+      if query =~ /[0-9]+/
+        s.write("GET /v1/zipsearch?zipcode=#{query} HTTP/1.0\r\n\r\n")
+      else
+        s.write("GET /v1/zipsearch?word=#{CGI.escape(query)} HTTP/1.0\r\n\r\n")
+      end
+    end
+
+    str = s.read
+    s.close
+
+    data = JSON.parse(str[str.index('{')..-1])
+    result = ""
+    if data["zipcode"].length == 0
+      result = "検索結果がなかったよ(´・ω・｀)"
+    elsif data["zipcode"].length <= 10
+      data["zipcode"].each { |key, value|   
+        result += "〒#{value["zipcode"][0..2]}-#{value["zipcode"][3..-1]} #{value["prefecture"]}#{value["city"]}#{value["town"]}\n"
+      }
+    else
+      result += "検索結果の10件を表示するよ！\n"
+      count = 0
+      data["zipcode"].each { |key, value|
+        result += "〒#{value["zipcode"][0..2]}-#{value["zipcode"][3..-1]} #{value["prefecture"]}#{value["city"]}#{value["town"]}\n"
+        count += 1
+        if count >= 10
+          break
+        end
+      }
+      result += "全部で#{data["zipcode"].length}通り見つかったよ\n"
+    end
+    result
+  end
+
 
   # PostBoxの中身をクリアしてイベントをキャンセル
   def clear_post(gui_postbox)
@@ -175,6 +221,17 @@ Plugin.create :shell_post do
         ::Gtk::openurl("#{text.sub(/^@openurl[ \n]+/,'')}")
       }
       clear_post(gui_postbox)
+
+    elsif text =~ /^@miku 郵便番号 .+/ or
+        text =~ /^@miku 郵便 .+/ or
+        text =~ /^@miku ゆうびん .+/ or
+        text =~ /^@miku 〒 .+/
+      Thread.new {
+        result = "郵便番号を検索したよ！(・∀・*)\n"
+        result += postal_search(text[text.index(/\S+$/)..-1])
+        Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
+      }
+      clear_post(gui_postbox)      
 
     elsif text =~ /^@?whois @?[a-zA-Z0-9_]+/
       idname = Regexp.new(/^@?whois @?([a-zA-Z0-9_]+)/).match(text).to_a[1]
