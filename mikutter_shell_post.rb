@@ -175,6 +175,12 @@ Plugin.create :shell_post do
         ::Gtk::openurl("#{text.sub(/^@openurl[ \n]+/,'')}")
       }
       clear_post(gui_postbox)
+
+    elsif text =~ /^@?whois @?[a-zA-Z0-9_]+/
+      Plugin.call(:show_profile,
+                  Service.primary,
+                  User.findbyidname(Regexp.new(/^@?whois @?([a-zA-Z0-9_]+)/).match(text).to_a[1]) )
+      clear_post(gui_postbox)      
     end
 
     [gui_postbox]

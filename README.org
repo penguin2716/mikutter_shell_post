@@ -51,6 +51,9 @@
 ** @openurl
    入力されたテキストにブラウザでアクセスします．
 
+** @whois <@idname>
+   ユーザを直接表示します．
+
 * 式展開機能
   投稿する際に#{}によってRubyの式を記述することができます．たとえば，
   : 2 ** 10 = #{2 ** 10}
@@ -64,6 +67,7 @@
   - @shell_rb 10.times { |x| puts x }
   - @shell_py print "10 * 20 = %d" % (10 * 20)
   - @shell_pl print 3 * 9 * 3 * 9
+  - @whois penguin2716
 
   - C++のコード例
   : @compile [src.cpp] [./a.out] g++
