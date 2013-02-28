@@ -3,6 +3,7 @@
 require 'socket'
 require 'json'
 require 'cgi'
+require 'weather_jp'
 
 Plugin.create :shell_post do
 
@@ -241,7 +242,19 @@ Plugin.create :shell_post do
       else
         Plugin.call(:update, nil, [Message.new(:message => "@#{idname}が見つかりませんでした", :system => true)])
       end
-      clear_post(gui_postbox)      
+      clear_post(gui_postbox)
+
+    elsif text =~ /^@miku\s+(.*の天気).*$/u
+      Thread.new {
+        result = "お天気予報を探したよ！(・∀・*)\n"
+        begin
+          result << WeatherJp.parse($1).to_s
+        rescue Exception => e
+          result << "見つけられなかったよ(´・ω・｀)"
+        end
+        Plugin.call(:update, nil, [Message.new(:message => result, :system => true)])
+      }
+      clear_post(gui_postbox)
     end
 
     [gui_postbox]
