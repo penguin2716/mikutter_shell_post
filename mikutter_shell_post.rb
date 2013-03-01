@@ -102,23 +102,23 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # Rubyで実行
-    elsif text =~ /^@shell_rb\s+.+/
+    elsif text =~ /^@shell_rb\s+(.+)/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 ruby -e '#{command_escape(text, '@shell_rb')}'`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 ruby -e '#{command_escape($1)}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Pythonで実行
-    elsif text =~ /^@shell_py\s+.+/
+    elsif text =~ /^@shell_py\s+(.+)/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 python -c '#{command_escape(text, '@shell_py')}'`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 python -c '#{command_escape($1)}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Perlで実行
-    elsif text =~ /^@shell_pl\s+.+/
+    elsif text =~ /^@shell_pl\s+(.+)/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 perl -e '#{command_escape(text, '@shell_pl')}'`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 perl -e '#{command_escape($1)}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
