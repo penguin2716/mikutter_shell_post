@@ -59,12 +59,12 @@ Plugin.create :shell_post do
     Plugin.filter_cancel!
   end
 
-  def command_escape(str, delete_str)
-    str.sub(/^#{delete_str}\s+/,'').gsub(/'/, '''\'''\\\\''\'''''\'''')    
+  def command_escape(str)
+    str.gsub(/'/, '''\'''\\\\''\'''''\'''')    
   end
 
-  def source_escape(str, delete_str)
-    str.sub(/^#{delete_str}\s+/,'').gsub(/'/, '''\'''')    
+  def source_escape(str)
+    str.gsub(/'/, '''\'''')    
   end
 
   def gen_random_str
