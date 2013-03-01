@@ -60,11 +60,11 @@ Plugin.create :shell_post do
   end
 
   def command_escape(str, delete_str)
-    str.sub(/^#{delete_str}[ \n]+/,'').gsub(/'/, '''\'''\\\\''\'''''\'''')    
+    str.sub(/^#{delete_str}\s+/,'').gsub(/'/, '''\'''\\\\''\'''''\'''')    
   end
 
   def source_escape(str, delete_str)
-    str.sub(/^#{delete_str}[ \n]+/,'').gsub(/'/, '''\'''')    
+    str.sub(/^#{delete_str}\s+/,'').gsub(/'/, '''\'''')    
   end
 
   def gen_random_str
@@ -76,10 +76,10 @@ Plugin.create :shell_post do
     text = Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text
 
     # @system に向けたリプライはmikutterコマンドとして処理する
-    if text =~ /^@system[ \n]+.+/
+    if text =~ /^@system\s+.+/
       Thread.new{
         begin
-          result = Kernel.instance_eval(text.sub(/^@system[ \n]+/,''))
+          result = Kernel.instance_eval(text.sub(/^@system\s+/,''))
           Plugin.call(:update, nil, [Message.new(:message => "#{result.to_s}", :system => true)])
         rescue Exception => e
           Plugin.call(:update, nil, [Message.new(:message => "失敗しました(´・ω・｀)\nコードを確認してみて下さい↓\n#{text}", :system => true)])
@@ -88,42 +88,42 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # @shell に向けたリプライは10秒でtimeoutする
-    elsif text =~ /^@shell[ \n]+.+/
+    elsif text =~ /^@shell\s+.+/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 #{text.sub(/^@shell[ \n]+/,'')}`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 #{text.sub(/^@shell\s+/,'')}`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # @shell_p に向けたリプライはtimeoutしない
-    elsif text =~ /^@shell_p[ \n]+.+/
+    elsif text =~ /^@shell_p\s+.+/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "exit #{text.sub(/^@shell_p[ \n]+/,'')}:\n#{`#{text.sub(/^@shell_p[ \n]+/,'')}`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "exit #{text.sub(/^@shell_p\s+/,'')}:\n#{`#{text.sub(/^@shell_p\s+/,'')}`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Rubyで実行
-    elsif text =~ /^@shell_rb[ \n]+.+/
+    elsif text =~ /^@shell_rb\s+.+/
       Thread.new{
         Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 ruby -e '#{command_escape(text, '@shell_rb')}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Pythonで実行
-    elsif text =~ /^@shell_py[ \n]+.+/
+    elsif text =~ /^@shell_py\s+.+/
       Thread.new{
         Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 python -c '#{command_escape(text, '@shell_py')}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Perlで実行
-    elsif text =~ /^@shell_pl[ \n]+.+/
+    elsif text =~ /^@shell_pl\s+.+/
       Thread.new{
         Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 perl -e '#{command_escape(text, '@shell_pl')}'`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # Cで実行
-    elsif text =~ /^@shell_c[ \n]+.+/
+    elsif text =~ /^@shell_c\s+.+/
       Thread.new{
         uniqdir = gen_random_str
         `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
@@ -137,7 +137,7 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # C++で実行
-    elsif text =~ /^@shell_cpp[ \n]+.+/
+    elsif text =~ /^@shell_cpp\s+.+/
       Thread.new{
         uniqdir = gen_random_str
         `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
@@ -151,7 +151,7 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # 入力されたテキストをファイルに書いて指定されたコマンドで実行
-    elsif text =~ /^@script.*/
+    elsif text =~ /^@script\s+.+/
       Thread.new {
         command = Regexp.new(/^@script +(.*)\n/).match(text).to_a[1]
         source = text.sub(/^@script +.*\n/, '')
@@ -168,7 +168,7 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # 入力されたテキストをファイルに書いて指定されたコマンドでコンパイル後，exec_commandを実行
-    elsif text =~ /^@compile.*/
+    elsif text =~ /^@compile\s+.+/
       Thread.new {
         re = Regexp.new(/^@compile *\[(.+)\] *\[(.+)\] *(.+)\n/)
         filename = re.match(text).to_a[1]
@@ -203,30 +203,30 @@ Plugin.create :shell_post do
       Plugin.filter_cancel!
 
     # @google に向けたリプライをクエリにしてGoogle検索
-    elsif text =~ /^@google[ \n]+.+/
+    elsif text =~ /^@google\s+.+/
       Thread.new{
-        ::Gtk::openurl("http://www.google.co.jp/search?q=" + URI.escape(text.sub(/^@google[ \n]+/,'')).to_s)
+        ::Gtk::openurl("http://www.google.co.jp/search?q=" + URI.escape(text.sub(/^@google\s+/,'')).to_s)
       }
       clear_post(gui_postbox)
 
     # @maps に向けたリプライをクエリにして地図検索
-    elsif text =~ /^@maps[ \n]+.+/
+    elsif text =~ /^@maps\s+.+/
       Thread.new{
-        ::Gtk::openurl("https://maps.google.co.jp/maps?q=" + URI.escape(text.sub(/^@maps[ \n]+/,'')).to_s)
+        ::Gtk::openurl("https://maps.google.co.jp/maps?q=" + URI.escape(text.sub(/^@maps\s+/,'')).to_s)
       }
       clear_post(gui_postbox)
 
     # @openurl に向けたリプライはそのままブラウザで開く
-    elsif text =~ /^@openurl[ \n]+.+/
+    elsif text =~ /^@openurl\s+.+/
       Thread.new{
-        ::Gtk::openurl("#{text.sub(/^@openurl[ \n]+/,'')}")
+        ::Gtk::openurl("#{text.sub(/^@openurl\s+/,'')}")
       }
       clear_post(gui_postbox)
 
-    elsif text =~ /^@miku 郵便番号 .+/ or
-        text =~ /^@miku 郵便 .+/ or
-        text =~ /^@miku ゆうびん .+/ or
-        text =~ /^@miku 〒 .+/
+    elsif text =~ /^@miku\s+郵便番号\s+.+/ or
+        text =~ /^@miku\s+郵便\s+.+/ or
+        text =~ /^@miku\s+ゆうびん\s+.+/ or
+        text =~ /^@miku\s+〒\s+.+/
       Thread.new {
         result = "郵便番号を検索したよ！(・∀・*)\n"
         result += postal_search(text[text.index(/\S+$/)..-1])
@@ -234,7 +234,7 @@ Plugin.create :shell_post do
       }
       clear_post(gui_postbox)      
 
-    elsif text =~ /^@?whois @?[a-zA-Z0-9_]+/
+    elsif text =~ /^@?whois\s+@?[a-zA-Z0-9_]+/
       idname = Regexp.new(/^@?whois @?([a-zA-Z0-9_]+)/).match(text).to_a[1]
       user = User.findbyidname(idname)
       if user
