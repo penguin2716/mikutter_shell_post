@@ -123,12 +123,12 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # Cで実行
-    elsif text =~ /^@shell_c\s+.+/
+    elsif text =~ /^@shell_c\s+([\w\W]+)/
       Thread.new{
         uniqdir = gen_random_str
         `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
         f = open("#{COMPILE_TMPDIR}/#{uniqdir}/src.c", "w")
-        f.write(source_escape(text, '@shell_c'))
+        f.write(source_escape($1))
         f.close
         result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && gcc src.c 2>&1 && timeout 10 ./a.out 2>&1`
         `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
@@ -137,12 +137,12 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # C++で実行
-    elsif text =~ /^@shell_cpp\s+.+/
+    elsif text =~ /^@shell_cpp\s+([\w\W]+)/
       Thread.new{
         uniqdir = gen_random_str
         `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
         f = open("#{COMPILE_TMPDIR}/#{uniqdir}/src.cpp", "w")
-        f.write(source_escape(text, '@shell_cpp'))
+        f.write(source_escape($1))
         f.close
         result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && g++ src.cpp 2>&1 && timeout 10 ./a.out 2>&1`
         `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
