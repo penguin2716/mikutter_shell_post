@@ -214,13 +214,10 @@ Plugin.create :shell_post do
       }
       clear_post(gui_postbox)
 
-    elsif text =~ /^@miku\s+郵便番号\s+.+/ or
-        text =~ /^@miku\s+郵便\s+.+/ or
-        text =~ /^@miku\s+ゆうびん\s+.+/ or
-        text =~ /^@miku\s+〒\s+.+/
+    elsif text =~ /^@miku\s+(郵便番号|郵便|ゆうびん|〒)\s+(.+)/
       Thread.new {
         result = "郵便番号を検索したよ！(・∀・*)\n"
-        result += postal_search(text[text.index(/\S+$/)..-1])
+        result += postal_search($2)
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)      
