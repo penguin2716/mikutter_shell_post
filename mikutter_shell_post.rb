@@ -256,6 +256,20 @@ Plugin.create :shell_post do
       }
       clear_post(gui_postbox)
 
+    elsif text =~ /^@miku\s+IC登録/
+      begin
+        icatr = `opensc-tool -a`.sub("\n", '')
+        if `grep #{icatr} #{File.expand_path(File.join(File.dirname(__FILE__), "valid_id"))}`.size > 1
+          Plugin.call(:update, nil, [Message.new(:message => "そのカードは既に登録済みです", :system => true)])
+        else
+          `echo #{icatr} >> #{File.expand_path(File.join(File.dirname(__FILE__), "valid_id"))}`
+          Plugin.call(:update, nil, [Message.new(:message => "登録しました(*ﾟ∀ﾟ)", :system => true)])
+        end
+      rescue Exception => e
+        Plugin.call(:update, nil, [Message.new(:message => "登録できませんでした", :system => true)])
+      end
+      clear_post(gui_postbox)
+
     elsif `which opensc-tool`
       begin
         icatr = `opensc-tool -a`.sub("\n", '')
