@@ -151,37 +151,28 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # 入力されたテキストをファイルに書いて指定されたコマンドで実行
-    elsif text =~ /^@script\s+.+/
+    elsif text =~ /^@script\s+(.+)\s+([\w\W]+)/
       Thread.new {
-        command = Regexp.new(/^@script +(.*)\n/).match(text).to_a[1]
-        source = text.sub(/^@script +.*\n/, '')
-
         uniqdir = gen_random_str
         `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
         f = open("#{COMPILE_TMPDIR}/#{uniqdir}/src.script", "w")
-        f.write(source_escape(source, /^@script.*\n/))
+        f.write(source_escape($2))
         f.close
-        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && #{command} ./src.script 2>&1`
+        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && #{$1} ./src.script 2>&1`
         `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # 入力されたテキストをファイルに書いて指定されたコマンドでコンパイル後，exec_commandを実行
-    elsif text =~ /^@compile\s+.+/
+      elsif text =~ /^@compile\s*\[(.+)\]\s*\[(.+)\]\s*(.+)\s+([\w\W]+)/
       Thread.new {
-        re = Regexp.new(/^@compile *\[(.+)\] *\[(.+)\] *(.+)\n/)
-        filename = re.match(text).to_a[1]
-        exec_command = re.match(text).to_a[2]
-        command = re.match(text).to_a[3]
-        source = text.sub(/^@compile +.*\n/, '')
-
         uniqdir = gen_random_str
         `mkdir -p #{COMPILE_TMPDIR}/#{uniqdir}`
-        f = open("#{COMPILE_TMPDIR}/#{uniqdir}/#{filename}", "w")
-        f.write(source_escape(source, /^@compile.*\n/))
+        f = open("#{COMPILE_TMPDIR}/#{uniqdir}/#{$1}", "w")
+        f.write(source_escape($4))
         f.close
-        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && #{command} #{filename} 2>&1 && #{exec_command} 2>&1`
+        result = `cd #{COMPILE_TMPDIR}/#{uniqdir} && #{$3} #{$1} 2>&1 && #{$2} 2>&1`
         `rm -rf #{COMPILE_TMPDIR}/#{uniqdir}`
         Plugin.call(:update, nil, [Message.new(:message => "#{result}", :system => true)])
       }
