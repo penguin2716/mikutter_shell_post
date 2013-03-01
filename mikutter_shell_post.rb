@@ -76,10 +76,10 @@ Plugin.create :shell_post do
     text = Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text
 
     # @system に向けたリプライはmikutterコマンドとして処理する
-    if text =~ /^@system\s+.+/
+    if text =~ /^@system\s+(.+)/
       Thread.new{
         begin
-          result = Kernel.instance_eval(text.sub(/^@system\s+/,''))
+          result = Kernel.instance_eval($1)
           Plugin.call(:update, nil, [Message.new(:message => "#{result.to_s}", :system => true)])
         rescue Exception => e
           Plugin.call(:update, nil, [Message.new(:message => "失敗しました(´・ω・｀)\nコードを確認してみて下さい↓\n#{text}", :system => true)])
@@ -88,16 +88,16 @@ Plugin.create :shell_post do
       clear_post(gui_postbox)
 
     # @shell に向けたリプライは10秒でtimeoutする
-    elsif text =~ /^@shell\s+.+/
+    elsif text =~ /^@shell\s+(.+)/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 #{text.sub(/^@shell\s+/,'')}`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "#{`timeout 10 #{$1}`}", :system => true)])
       }
       clear_post(gui_postbox)
 
     # @shell_p に向けたリプライはtimeoutしない
-    elsif text =~ /^@shell_p\s+.+/
+    elsif text =~ /^@shell_p\s+(.+)/
       Thread.new{
-        Plugin.call(:update, nil, [Message.new(:message => "exit #{text.sub(/^@shell_p\s+/,'')}:\n#{`#{text.sub(/^@shell_p\s+/,'')}`}", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "exit #{$1}:\n#{`#{$1}`}", :system => true)])
       }
       clear_post(gui_postbox)
 
@@ -203,23 +203,23 @@ Plugin.create :shell_post do
       Plugin.filter_cancel!
 
     # @google に向けたリプライをクエリにしてGoogle検索
-    elsif text =~ /^@google\s+.+/
+    elsif text =~ /^@google\s+(.+)/
       Thread.new{
-        ::Gtk::openurl("http://www.google.co.jp/search?q=" + URI.escape(text.sub(/^@google\s+/,'')).to_s)
+        ::Gtk::openurl("http://www.google.co.jp/search?q=" + URI.escape($1).to_s)
       }
       clear_post(gui_postbox)
 
     # @maps に向けたリプライをクエリにして地図検索
-    elsif text =~ /^@maps\s+.+/
+    elsif text =~ /^@maps\s+(.+)/
       Thread.new{
-        ::Gtk::openurl("https://maps.google.co.jp/maps?q=" + URI.escape(text.sub(/^@maps\s+/,'')).to_s)
+        ::Gtk::openurl("https://maps.google.co.jp/maps?q=" + URI.escape($1).to_s)
       }
       clear_post(gui_postbox)
 
     # @openurl に向けたリプライはそのままブラウザで開く
-    elsif text =~ /^@openurl\s+.+/
+    elsif text =~ /^@openurl\s+(.+)/
       Thread.new{
-        ::Gtk::openurl("#{text.sub(/^@openurl\s+/,'')}")
+        ::Gtk::openurl("#{$1}")
       }
       clear_post(gui_postbox)
 
@@ -234,13 +234,12 @@ Plugin.create :shell_post do
       }
       clear_post(gui_postbox)      
 
-    elsif text =~ /^@?whois\s+@?[a-zA-Z0-9_]+/
-      idname = Regexp.new(/^@?whois @?([a-zA-Z0-9_]+)/).match(text).to_a[1]
-      user = User.findbyidname(idname)
+    elsif text =~ /^@?whois\s+@?([a-zA-Z0-9_]+)/
+      user = User.findbyidname($1)
       if user
         Plugin.call(:show_profile, Service.primary, user)
       else
-        Plugin.call(:update, nil, [Message.new(:message => "@#{idname}が見つかりませんでした", :system => true)])
+        Plugin.call(:update, nil, [Message.new(:message => "@#{$1}が見つかりませんでした", :system => true)])
       end
       clear_post(gui_postbox)
 
