@@ -255,6 +255,15 @@ Plugin.create :shell_post do
         Plugin.call(:update, nil, [Message.new(:message => result, :system => true)])
       }
       clear_post(gui_postbox)
+
+    elsif `which opensc-tool`
+      begin
+        icatr = `opensc-tool -a`.sub("\n", '')
+        if `cat #{File.expand_path(File.join(File.dirname(__FILE__), "valid_id"))}`.split("\n").find{|id| id == icatr}
+          Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text += " [IC認証済]"
+        end
+      rescue Exception => e
+      end
     end
 
     [gui_postbox]
