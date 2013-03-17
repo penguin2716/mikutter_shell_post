@@ -12,10 +12,10 @@ Plugin.create :shell_post do
     "/dev/shm/mikutter_scratch"
   end
 
-  @hash = {}
+  @add_ons = {}
 
   def add_command(re, &proc)
-    @hash[re] = proc
+    @add_ons[re] = proc
   end
 
 
@@ -132,7 +132,7 @@ Plugin.create :shell_post do
       end
     end
 
-    @hash.each do |key, proc|
+    @add_ons.each do |key, proc|
       if key =~ text
         proc.call(text)
         clear_post(gui_postbox)
