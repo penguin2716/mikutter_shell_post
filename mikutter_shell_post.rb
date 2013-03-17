@@ -18,6 +18,9 @@ Plugin.create :shell_post do
     @add_ons[re] = proc
   end
 
+  def delete_command(re)
+    @add_ons.delete(re)
+  end
 
   def postal_search(query, mode = :auto)
     s = TCPSocket.new("api.postalcode.jp", 80)
