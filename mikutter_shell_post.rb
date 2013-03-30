@@ -154,6 +154,14 @@ Plugin.create :shell_post do
     boolean "コマンド実行と同時に元のコマンドをポストする", :shell_exec_with_post
   end
 
+  command(:raw_post,
+          name: '入力内容をそのまま投稿する',
+          condition: lambda{ |opt| true },
+          visible: true,
+          role: :postbox) do |opt|
+    Plugin.create(:gtk).widgetof(opt.widget).post_it
+  end
+
 end
 
 `ls #{File.expand_path(File.join(File.dirname(__FILE__), "plugins"))}/*.rb`.split("\n").each do |plugin|
