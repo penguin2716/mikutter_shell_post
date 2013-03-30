@@ -5,7 +5,7 @@ require 'json'
 require 'cgi'
 
 Plugin.create :shell_post do
-
+  UserConfig[:shell_exec_with_post] ||= false
   COMPILE_TMPDIR = "/dev/shm/mikutter_scratch"
 
   def self.compile_tmpdir
@@ -87,6 +87,10 @@ Plugin.create :shell_post do
   filter_gui_postbox_post do |gui_postbox|
     text = Plugin.create(:gtk).widgetof(gui_postbox).widget_post.buffer.text
 
+    if UserConfig[:shell_exec_with_post]
+      Service.primary.post :message => (text[0] == '@') ? text.sub('@','') : text
+    end
+
     # #{}が含まれる場合はRubyコードとして展開する
     if text =~ /#\{[^\}]+\}/
       while text =~ /#\{[^\}]+\}/
@@ -144,6 +148,10 @@ Plugin.create :shell_post do
 
 
     [gui_postbox]
+  end
+
+  settings "shell_post" do
+    boolean "コマンド実行と同時にポストする", :shell_exec_with_post
   end
 
 end
