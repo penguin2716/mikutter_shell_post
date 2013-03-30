@@ -151,7 +151,7 @@ Plugin.create :shell_post do
   end
 
   settings "shell_post" do
-    boolean "コマンド実行と同時にポストする", :shell_exec_with_post
+    boolean "コマンド実行と同時に元のコマンドをポストする", :shell_exec_with_post
   end
 
 end
@@ -159,3 +159,4 @@ end
 `ls #{File.expand_path(File.join(File.dirname(__FILE__), "plugins"))}/*.rb`.split("\n").each do |plugin|
   load plugin
 end
+
