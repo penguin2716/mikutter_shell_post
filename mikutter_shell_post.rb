@@ -3,6 +3,7 @@
 require 'socket'
 require 'json'
 require 'cgi'
+require 'open-uri'
 
 Plugin.create :shell_post do
   UserConfig[:shell_exec_with_post] ||= false
@@ -23,24 +24,21 @@ Plugin.create :shell_post do
   end
 
   def postal_search(query, mode = :auto)
-    s = TCPSocket.new("api.postalcode.jp", 80)
-
+    baseurl = 'http://api.postalcode.jp/v1/zipsearch'
+    str = ''
     if mode == :zipcode
-      s.write("GET /v1/zipsearch?zipcode=#{query} HTTP/1.0\r\n\r\n")
+      str = open("#{baseurl}?zipcode=#{query}").read
     elsif mode == :word
-      s.write("GET /v1/zipsearch?word=#{CGI.escape(query)} HTTP/1.0\r\n\r\n")
+      str = open("#{baseurl}?word=#{CGI.escape(query)}").read
     else
       if query =~ /[0-9]+/
-        s.write("GET /v1/zipsearch?zipcode=#{query} HTTP/1.0\r\n\r\n")
+        str = open("#{baseurl}?zipcode=#{query}").read
       else
-        s.write("GET /v1/zipsearch?word=#{CGI.escape(query)} HTTP/1.0\r\n\r\n")
+        str = open("#{baseurl}?word=#{CGI.escape(query)}").read
       end
     end
 
-    str = s.read
-    s.close
-
-    data = JSON.parse(str[str.index('{')..-1])
+    data = JSON.parse(str)
     result = ""
     if data["zipcode"].length == 0
       result = "検索結果がなかったよ(´・ω・｀)"
